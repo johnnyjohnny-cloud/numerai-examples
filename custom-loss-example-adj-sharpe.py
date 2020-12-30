@@ -97,6 +97,7 @@ def printModelScore(model, train, val, model2=None):
     else:
         train[PREDICTION_NAME] = model.predict(train[feature_columns]) + model2.predict(train[feature_columns])
         val[PREDICTION_NAME] = model.predict(val[feature_columns]) + model2.predict(val[feature_columns])
+
     train_correlations = train.groupby("era").apply(examples.score)
     print(f"On training the correlation has mean {train_correlations.mean()} and std {train_correlations.std()}")
     print(f"On training the average per-era payout is {examples.payout(train_correlations).mean()}")
@@ -130,5 +131,10 @@ print("---------Init Scores-----------")
 printModelScore(model_init, train, validation_data)
 print("---------Combined Scores--------------")
 printModelScore(model_init, train, validation_data, model_adj_sharpe)
+
+tournament_data[PREDICTION_NAME]= model_init.predict(tournament_data[feature_columns]) + \
+            model_adj_sharpe.predict(tournament_data[feature_columns])
+tournament_data[PREDICTION_NAME]= examples.unif(tournament_data[PREDICTION_NAME])
+tournament_data[PREDICTION_NAME].to_csv("submission.csv", header=True)
 
     
